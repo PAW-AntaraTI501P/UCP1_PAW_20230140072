@@ -13,27 +13,28 @@ app.use(cors());
 app.use(express.json());
 app.set("view engine", "ejs");
 
-app.use("/perpustakaan", libraryRoutes);
-
-app.get("/books-data", (req, res) => {
-  res.json(books);
+app.get("/", (req, res) => {
+  res.render("index", {
+    layout: "layouts/main-layout",
+    title: "Halaman Utama"
+  });
 });
 
 app.get("/books", (req, res) => {
-  db.query("SELECT * FROM buku", (err, todos) => {
-    if (err) return res.status(500).send("Internal Server Error");
+  db.query("SELECT * FROM buku", (err, results) => {
+    if (err) {
+      console.error("Error querying database:", err);
+      return res.status(500).send("Internal Server Error");
+    }
     res.render("books", {
-        books: books,
+      title: "Daftar Buku",
       layout: "layouts/main-layout",
+      books: results 
     });
   });
 });
 
-app.get("/", (req, res) => {
-  res.render("index", {
-    layout: "layouts/main-layout",
-  });
-});
+app.use("/api/books", libraryRoutes);
 
 app.use((req, res) => {
   res.status(404).send("404 - Page Not Found");

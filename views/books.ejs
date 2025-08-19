@@ -13,39 +13,38 @@
     <div class="container mt-5">
       <h1 class="text-center">Perpustakaan</h1>
 
-      <form id="addTodoForm" class="my-4">
+      <form id="addBookForm" class="my-4">
         <div class="input-group">
           <input
             type="text"
-            id="newTask"
+            id="newBookName"
             class="form-control"
-            placeholder="Add a new task..."
+            placeholder="Masukkan nama buku baru..."
             required
           />
           <div class="input-group-append">
-            <button type="submit" class="btn btn-primary">Add Nama Buku</button>
+            <button type="submit" class="btn btn-primary">Tambah Buku</button>
           </div>
         </div>
       </form>
 
-      <ul id="todoList" class="list-group">
-        <% books.forEach(todo=> { %>
+      <ul id="bookList" class="list-group">
+        <% books.forEach(book => { %>
         <li
           class="list-group-item d-flex justify-content-between align-items-center"
         >
-          <span class="<%= books.completed ? 'completed' : '' %>">
-            <%= books.nama_buku %>
-          </span>
+          <span><%= book.nama_buku %></span>
           <div>
             <button
               class="btn btn-sm btn-success mr-2 editBtn"
-              data-id="<%= books.id %>"
+              data-id="<%= book.id %>"
+              data-name="<%= book.nama_buku %>"
             >
               Edit
             </button>
             <button
               class="btn btn-sm btn-danger deleteBtn"
-              data-id="<%= books.id %>"
+              data-id="<%= book.id %>"
             >
               Delete
             </button>
@@ -54,7 +53,6 @@
         <% }); %>
       </ul>
 
-      <!-- Edit Todo Modal -->
       <div
         id="editModal"
         class="modal fade"
@@ -79,10 +77,10 @@
             <div class="modal-body">
               <form id="editTodoForm">
                 <div class="form-group">
-                  <label for="editTask">Task</label>
+                  <label for="editBookName">Nama Buku</label>
                   <input
                     type="text"
-                    id="editTask"
+                    id="editBookName"
                     class="form-control"
                     required
                   />
@@ -107,16 +105,15 @@
       $(document).ready(function () {
         let editId;
 
-        // Add new todo
-        $("#addTodoForm").on("submit", function (e) {
+        $("#addBookForm").on("submit", function (e) {
           e.preventDefault();
-          const task = $("#newTask").val().trim();
-          if (task) {
+          const bookName = $("#newBookName").val().trim();
+          if (bookName) {
             $.ajax({
-              url: "/todos",
+              url: "/api/books",
               type: "POST",
               contentType: "application/json",
-              data: JSON.stringify({ task: task }),
+              data: JSON.stringify({ nama_buku: bookName }),
               success: function () {
                 location.reload();
               },
@@ -126,11 +123,11 @@
             });
           }
         });
-        // Delete a todo
+
         $(".deleteBtn").on("click", function () {
           const id = $(this).data("id");
           $.ajax({
-            url: "/todos/" + id,
+            url: "/api/books" + id,
             type: "DELETE",
             success: function () {
               location.reload();
@@ -138,23 +135,21 @@
           });
         });
 
-        // Show edit modal
         $(".editBtn").on("click", function () {
           editId = $(this).data("id");
-          const currentTask = $(this).closest("li").find("span").text();
-          $("#editTask").val(currentTask);
+          const currentName = $(this).data('name');
+          $("#editBookName").val(currentName);
           $("#editModal").modal("show");
         });
 
-        // Update todo
-        $("#editTodoForm").on("submit", function (e) {
+        $("#editBookForm").on("submit", function (e) {
           e.preventDefault();
-          const task = $("#editTask").val().trim();
-          if (task) {
+          const newName = $("#editBookName").val().trim();
+          if (newName) {
             $.ajax({
-              url: "/todos/" + editId,
+              url: "/api/books" + editId,
               type: "PUT",
-              data: JSON.stringify({ task: task, completed: false }),
+              data: JSON.stringify({ nama_buku: newName}),
               contentType: "application/json",
               success: function () {
                 location.reload();
